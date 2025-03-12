@@ -46,4 +46,4 @@ This extension is designed to be minimally invasive:
 
 ## License
 
-MIT 
+GNU General Public License v3.0 
