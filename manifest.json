@@ -5,7 +5,6 @@
   "description": "Redirects new tabs to your homepage - supports both HTTP and HTTPS",
   "author": "Brad",
   "permissions": ["storage"],
-  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
