@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+  AlwaysGoHome Extension - Popup HTML
+  Version: 1.0.1
+  Last updated: 2025-03-11
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>AlwaysGoHome</title>
+<style>
+  :root {
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --input-background: #ffffff;
+    --input-text: #333333;
+    --input-border: #ccc;
+    --button-background: #4285f4;
+    --button-text: white;
+    --button-hover: #3367d6;
+    --success-color: #4caf50;
+    --error-color: #f44336;
+    --note-color: #666;
+    --secondary-background: #f8f8f8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #292a2d;
+      --text-color: #e8eaed;
+      --input-background: #202124;
+      --input-text: #e8eaed;
+      --input-border: #5f6368;
+      --button-background: #5c9bff;
+      --button-text: #202124;
+      --button-hover: #7ba9ff;
+      --success-color: #81c995;
+      --error-color: #f28b82;
+      --note-color: #9aa0a6;
+      --secondary-background: #35363a;
+    }
+  }
+
+  body { 
+    width: 300px; 
+    padding: 10px; 
+    font-family: sans-serif; 
+    font-size: 14px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  input { 
+    width: 100%; 
+    margin-bottom: 12px; 
+    padding: 8px; 
+    box-sizing: border-box;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--input-background);
+    color: var(--input-text);
+  }
+  
+  button { 
+    padding: 8px 12px; 
+    background-color: var(--button-background); 
+    color: var(--button-text);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: var(--button-hover);
+  }
+  
+  #status { 
+    margin-left: 10px; 
+    font-weight: bold;
+  }
+  
+  .success { color: var(--success-color); }
+  .error { color: var(--error-color); }
+  
+  .note {
+    font-size: 12px;
+    color: var(--note-color);
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--secondary-background);
+  }
+  
+  .protocol-selector {
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: var(--secondary-background);
+  }
+  
+  .protocol-option {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+  }
+  
+  .protocol-option input {
+    width: auto;
+    margin: 0 6px 0 0;
+  }
+  
+  .protocol-note {
+    display: block;
+    font-size: 11px;
+    color: var(--note-color);
+    margin-top: 2px;
+  }
+
+  h3 {
+    color: var(--button-background);
+    margin-top: 0;
+    margin-right: 32px; /* Make room for icon */
+  }
+  
+  .options-container {
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: var(--secondary-background);
+  }
+  
+  .option-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  .option-item input {
+    width: auto;
+    margin: 0 6px 0 0;
+  }
+  
+  .option-description {
+    display: block;
+    font-size: 11px;
+    color: var(--note-color);
+    margin-top: 2px;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+</style>
+<!-- External script to comply with Content Security Policy -->
+<script src="popup.js"></script>
+</head>
+<body>
+<div class="header-container">
+  <h3>AlwaysGoHome Extension</h3>
+  <img src="icons/alwaysgohome.png" alt="AlwaysGoHome" class="header-icon">
+</div>
+<p>Set your preferred new tab homepage:</p>
+<input type="text" id="url" placeholder="Enter homepage URL (e.g., google.com)">
+
+<div class="protocol-selector">
+  <label class="protocol-option">
+    <input type="checkbox" id="use-http"> Use HTTP instead of HTTPS
+  </label>
+  <small class="protocol-note">Only use HTTP for local networks or trusted sites</small>
+</div>
+
+<div class="options-container">
+  <div class="option-item">
+    <input type="checkbox" id="redirect-once"> 
+    <label for="redirect-once">Redirect only once per browser launch</label>
+  </div>
+  <span class="option-description">When checked, new tabs will only redirect to your homepage the first time after starting your browser</span>
+</div>
+
+<button id="save">Save</button>
+<span id="status"></span>
+</body>
+</html> 

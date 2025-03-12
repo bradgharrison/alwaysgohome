@@ -1,0 +1,24 @@
+# AlwaysGoHome Chrome Extension - Git Ignore File
+
+# Backup files
+*backup*
+*.bak
+*.backup
+*.old
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Build/package files
+node_modules/
+*.zip
+*.crx
+*.pem 

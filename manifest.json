@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "AlwaysGoHome",
+  "version": "1.0.1",
+  "description": "Redirects new tabs to your homepage - supports both HTTP and HTTPS",
+  "author": "Brad",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "chrome_url_overrides": {
+    "newtab": "redirect.html"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Set Homepage",
+    "default_icon": {
+      "16": "icons/alwaysgohome.png",
+      "48": "icons/alwaysgohome.png",
+      "128": "icons/alwaysgohome.png"
+    }
+  },
+  "icons": {
+    "16": "icons/alwaysgohome.png",
+    "48": "icons/alwaysgohome.png",
+    "128": "icons/alwaysgohome.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+} 
