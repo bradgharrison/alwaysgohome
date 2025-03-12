@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="mGjv-5FpvQIN3J2Vi9boxVGCyYHEzUb5e4IeI6BaCAg" />
+    <title>AlwaysGoHome - Chrome Extension</title>
+    <style>
+        :root {
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --accent-color: #4285f4;
+            --link-color: #1a73e8;
+            --border-color: #ddd;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #292a2d;
+                --text-color: #e8eaed;
+                --accent-color: #5c9bff;
+                --link-color: #8ab4f8;
+                --border-color: #5f6368;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header img {
+            width: 128px;
+            height: 128px;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-color);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .feature-list {
+            padding-left: 20px;
+        }
+
+        .feature-list li {
+            margin-bottom: 10px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .cta-button:hover {
+            background-color: var(--link-color);
+            text-decoration: none;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="icons/alwaysgohome.png" alt="AlwaysGoHome Logo">
+        <h1>AlwaysGoHome</h1>
+        <p>A super simple Chrome extension that redirects new tabs to your homepage</p>
+    </header>
+
+    <main>
+        <h2>Features</h2>
+        <ul class="feature-list">
+            <li>Redirects new tab pages to your preferred homepage</li>
+            <li>Works on all Chrome browsers (including ChromeOS!)</li>
+            <li>Minimal interface with a simple settings panel</li>
+            <li>Lightweight with just essential files (under 5KB total)</li>
+            <li>Privacy-friendly - requires minimal permissions</li>
+            <li>No browsing history access required</li>
+            <li>Support for both HTTP and HTTPS protocols</li>
+            <li>Light and dark mode support</li>
+        </ul>
+
+        <h2>Installation</h2>
+        <p>You can install AlwaysGoHome directly from the Chrome Web Store or manually install it from the GitHub repository.</p>
+        
+        <h3>From Chrome Web Store</h3>
+        <p>Visit the Chrome Web Store page and click "Add to Chrome":</p>
+        <a href="#" class="cta-button">Get AlwaysGoHome from Chrome Web Store</a>
+        
+        <h3>Manual Installation</h3>
+        <ol>
+            <li>Download or clone <a href="https://github.com/bradgharrison/alwaysgohome">this repository</a></li>
+            <li>Open Chrome and go to <code>chrome://extensions/</code></li>
+            <li>Enable "Developer mode" (toggle in the top-right corner)</li>
+            <li>Click "Load unpacked" and select the AlwaysGoHome folder</li>
+            <li>The extension should now be installed</li>
+        </ol>
+
+        <h2>Privacy</h2>
+        <p>This extension is designed to be minimally invasive:</p>
+        <ul>
+            <li>Only requires storage permission to save your homepage preference</li>
+            <li>Does not access or store browsing history</li>
+            <li>No tracking or analytics</li>
+            <li>All settings stored locally on your device</li>
+        </ul>
+    </main>
+
+    <footer>
+        <p>© 2023 AlwaysGoHome - <a href="https://github.com/bradgharrison/alwaysgohome">GitHub Repository</a></p>
+        <p>Licensed under the GNU General Public License v3.0</p>
+    </footer>
+</body>
+</html> 
