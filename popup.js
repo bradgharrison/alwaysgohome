@@ -1,6 +1,6 @@
 /**
  * AlwaysGoHome Extension - Popup Script
- * Version: 1.2
+ * Version: 2.0
  * Last updated: 2025-03-12
  */
 
@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('save').addEventListener('click', function() {
     var inputUrl = document.getElementById('url').value.trim();
     var redirectOnce = document.getElementById('redirect-once').checked;
+    var sameTab = document.getElementById('same-tab').checked;
     
     if (inputUrl) {
       var url = processUrl(inputUrl);
@@ -66,7 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Save directly to Chrome storage
       chrome.storage.local.set({
         homepage: url,
-        redirectOnce: redirectOnce
+        redirectOnce: redirectOnce,
+        sameTab: sameTab
       }, function() {
         if (chrome.runtime.lastError) {
           logError("Error saving: " + chrome.runtime.lastError.message);
@@ -104,10 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Initialize the popup
+// Function to initialize the popup
 function initPopup() {
   // Get all settings from storage
-  chrome.storage.local.get(['homepage', 'redirectOnce'], function(data) {
+  chrome.storage.local.get(['homepage', 'redirectOnce', 'sameTab'], function(data) {
     if (chrome.runtime.lastError) {
       logError("Error getting settings: " + chrome.runtime.lastError.message);
       showStatus("Error loading settings", "error");
@@ -126,5 +128,8 @@ function initPopup() {
     
     // Set redirect once checkbox
     document.getElementById('redirect-once').checked = !!data.redirectOnce;
+    
+    // Set same-tab checkbox
+    document.getElementById('same-tab').checked = !!data.sameTab;
   });
 } 

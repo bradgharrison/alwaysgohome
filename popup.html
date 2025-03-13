@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   AlwaysGoHome Extension - Popup HTML
-  Version: 1.2
+  Version: 2.0
   Last updated: 2025-03-12
 -->
 <html>
@@ -94,37 +94,6 @@
     background-color: var(--secondary-background);
   }
   
-  .protocol-selector {
-    margin-bottom: 12px;
-    padding: 8px;
-    border-radius: 4px;
-    background-color: var(--secondary-background);
-  }
-  
-  .protocol-option {
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-  }
-  
-  .protocol-option input {
-    width: auto;
-    margin: 0 6px 0 0;
-  }
-  
-  .protocol-note {
-    display: block;
-    font-size: 11px;
-    color: var(--note-color);
-    margin-top: 2px;
-  }
-
-  h3 {
-    color: var(--button-background);
-    margin-top: 0;
-    margin-right: 32px; /* Make room for icon */
-  }
-  
   .options-container {
     margin-bottom: 12px;
     padding: 8px;
@@ -175,19 +144,24 @@
 <p>Set your preferred new tab homepage:</p>
 <input type="text" id="url" placeholder="Enter homepage URL (e.g., google.com)">
 
-<div class="protocol-selector">
-  <label class="protocol-option">
-    <input type="checkbox" id="use-http"> Use HTTP instead of HTTPS
-  </label>
-  <small class="protocol-note">Only use HTTP for local networks or trusted sites</small>
-</div>
-
 <div class="options-container">
   <div class="option-item">
+    <input type="checkbox" id="same-tab"> 
+    <label for="same-tab">Maintain single homepage tab</label>
+  </div>
+  <span class="option-description">When checked, new tabs will redirect to your existing homepage tab instead of creating multiple tabs</span>
+  
+  <div class="option-item" style="margin-top: 10px;">
     <input type="checkbox" id="redirect-once"> 
     <label for="redirect-once">Redirect only once per browser launch</label>
   </div>
   <span class="option-description">When checked, new tabs will only redirect to your homepage the first time after starting your browser</span>
+  
+  <div class="option-item" style="margin-top: 10px;">
+    <input type="checkbox" id="use-http"> 
+    <label for="use-http">Use HTTP instead of HTTPS</label>
+  </div>
+  <span class="option-description">Only use HTTP for local networks or trusted sites</span>
 </div>
 
 <button id="save">Save</button>
