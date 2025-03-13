@@ -18,6 +18,7 @@ desktop.ini
 *.swp
 *~
 .cursor/
+always_go_home.code-workspace
 
 # Build/package files
 node_modules/
