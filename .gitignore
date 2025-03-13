@@ -2,6 +2,7 @@
 
 # Backup files
 *backup*
+Backup/
 *.bak
 *.backup
 *.old
@@ -16,9 +17,15 @@ desktop.ini
 .idea/
 *.swp
 *~
+.cursor/
 
 # Build/package files
 node_modules/
 *.zip
 *.crx
-*.pem 
+AlwaysGoHome.crx
+*.pem
+AlwaysGoHome.pem
+
+# Duplicate directories
+AlwaysGoHome/ 

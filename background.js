@@ -1,7 +1,7 @@
 /**
  * AlwaysGoHome Extension - Background Script
- * Version: 1.0.1
- * Last updated: 2025-03-11
+ * Version: 1.2
+ * Last updated: 2025-03-12
  */
 
 // Note: We no longer need tab listeners since we're using chrome_url_overrides

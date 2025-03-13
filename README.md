@@ -18,10 +18,6 @@ A super simple Chrome extension that forces Chrome to open to your homescreen (e
 4. Click "Load unpacked" and select the `AlwaysGoHome` folder
 5. The extension should now be installed
 
-or
-
-on the chrome web store @<URL HERE>
-
 ## Usage
 
 1. Click the extension icon in Chrome's extension menu

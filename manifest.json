@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AlwaysGoHome",
-  "version": "1.0.2",
+  "version": "1.2",
   "description": "Redirects new tabs to your homepage - supports both HTTP and HTTPS",
   "author": "Brad",
   "permissions": ["storage"],
