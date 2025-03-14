@@ -100,6 +100,27 @@ The extension is prepared for Chrome Web Store submission with:
 - Created a tab hijacking system for the initial Chrome startup tab
 - Developed a robust tab-closing mechanism that works reliably across browser sessions
 
+## Version 2.1 Updates
+
+### Focus Management Improvements
+- Enhanced tab focus handling to ensure proper keyboard focus after redirection
+- Added robust focus system that properly focuses on the search input when available
+- Implemented messaging between background script and content script for reliable focus control
+- Fixed issue where users couldn't immediately type after tab redirection
+- Added `focusOnLoad` URL parameter to trigger proper focus behavior after page loading
+
+### Code Refinements
+- Added delay handling to ensure focus is set after navigation completes
+- Enhanced error handling for focus-related operations
+- Improved focus management across all script components (background, content, redirect)
+- Implemented consistent focus handling for all tab management scenarios
+
+### General Improvements
+- Improved validation to prevent tab manipulation when no homepage is set
+- Enhanced the homepage tab verification system
+- Streamlined debugging code while maintaining core functionality
+- Fixed edge cases in tab opening and focus behavior
+
 ---
 
-This project successfully transformed a basic Chrome extension into a polished, privacy-focused tool ready for distribution, following best practices for both code quality and user experience. Version 2.0 significantly enhances the user experience by providing efficient tab management while maintaining the extension's simplicity and lightweight nature. 
+This project successfully transformed a basic Chrome extension into a polished, privacy-focused tool ready for distribution, following best practices for both code quality and user experience. Version 2.1 significantly enhances the user experience by providing robust focus management, ensuring users can immediately start typing after tab redirection or focusing. 
