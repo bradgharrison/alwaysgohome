@@ -1,7 +1,7 @@
 /**
  * AlwaysGoHome Extension - Popup Script
- * Version: 2.0
- * Last updated: 2025-03-12
+ * Version: 2.1.0-beta
+ * Last updated: 2024-03-12
  */
 
 // Constants

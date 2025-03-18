@@ -1,6 +1,6 @@
 /**
- * AlwaysGoHome Extension - Content Script
- * Version: 2.0
+ * Version: 2.1.0-beta
+ * Content script for AlwaysGoHome extension
  * Last updated: 2025-03-12
  */
 
@@ -90,6 +90,48 @@ function setupLinkHandlers() {
   }, true);
 }
 
+// Function to ensure the page has focus
+function ensurePageFocus() {
+  logDebug("Ensuring page has focus");
+  
+  try {
+    // Don't try to focus if user is already typing somewhere
+    if (document.activeElement && 
+        (document.activeElement.tagName === 'INPUT' || 
+         document.activeElement.tagName === 'TEXTAREA' ||
+         document.activeElement.isContentEditable)) {
+      logDebug("User is already typing, not changing focus");
+      return;
+    }
+
+    // First, focus the window
+    window.focus();
+    
+    // Then focus the document body
+    if (document.body) {
+      document.body.setAttribute('tabindex', '0');
+      document.body.style.outline = 'none'; // Hide focus ring
+      document.body.focus({ preventScroll: true });
+    }
+    
+    // Try to find and focus a search input if it exists
+    const searchInputs = document.querySelectorAll('input[type="search"], input[name="q"], input[name="query"], input[name="search"]');
+    if (searchInputs.length > 0) {
+      searchInputs[0].focus({ preventScroll: true });
+      logDebug("Focused search input");
+      return;
+    }
+    
+    // If no search input, ensure body has focus
+    if (document.body) {
+      document.body.focus({ preventScroll: true });
+      logDebug("Focused document body");
+    }
+  } catch (e) {
+    logError("Error ensuring focus: " + e);
+  }
+}
+
 // Initialize when the page loads
 function init() {
   logDebug("Content script running on: " + window.location.href);
@@ -103,6 +145,9 @@ function init() {
     
     // Set up handlers for links
     setupLinkHandlers();
+    
+    // Try to focus once on load
+    ensurePageFocus();
   }
 }
 
@@ -115,8 +160,26 @@ if (document.readyState === 'loading') {
 
 // Also check when fully loaded (for late-loading content)
 window.addEventListener('load', function() {
-  if (isHomepageTab() && !processingClick) {
+  if (isHomepageTab()) {
     // Double-check our link handlers are set up
     setupLinkHandlers();
+    // Try focus one more time after full load
+    ensurePageFocus();
+  }
+});
+
+// Listen for visibility changes
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && isHomepageTab()) {
+    // When the page becomes visible, ensure it has focus
+    ensurePageFocus();
+  }
+});
+
+// Listen for window focus
+window.addEventListener('focus', function() {
+  if (isHomepageTab()) {
+    // When the window gets focus, ensure the page has focus
+    ensurePageFocus();
   }
 }); 
