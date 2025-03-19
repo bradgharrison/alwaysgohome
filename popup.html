@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!--
     AlwaysGoHome Extension - Popup HTML
-    Version: 2.1.0
-    Last updated: 2024-03-12
+    Version: 3.0.0
+    Last updated: 2024-03-19
 -->
 <html>
 <head>
@@ -133,38 +133,46 @@
     flex-shrink: 0;
   }
 </style>
-<!-- External script to comply with Content Security Policy -->
-<script src="popup.js"></script>
 </head>
 <body>
-<div class="header-container">
-  <h3>AlwaysGoHome Extension</h3>
-  <img src="icons/alwaysgohome.png" alt="AlwaysGoHome" class="header-icon">
+<h1 style="display:flex; align-items:center; font-size: 18px; margin-top: 0;">
+  <img src="icons/alwaysgohome.png" alt="Icon" width="24" height="24" style="margin-right: 10px;">
+  AlwaysGoHome
+</h1>
+
+<div>
+  <label for="url">Homepage URL:</label>
+  <input type="text" id="url" placeholder="example.com" autofocus>
 </div>
-<p>Set your preferred new tab homepage:</p>
-<input type="text" id="url" placeholder="Enter homepage URL (e.g., google.com)">
 
 <div class="options-container">
-  <div class="option-item">
-    <input type="checkbox" id="same-tab"> 
-    <label for="same-tab">Maintain single homepage tab</label>
-  </div>
-  <span class="option-description">When checked, new tabs will redirect to your existing homepage tab instead of creating multiple tabs</span>
-  
-  <div class="option-item" style="margin-top: 10px;">
-    <input type="checkbox" id="redirect-once"> 
-    <label for="redirect-once">Redirect only once per browser launch</label>
-  </div>
-  <span class="option-description">When checked, new tabs will only redirect to your homepage the first time after starting your browser</span>
-  
-  <div class="option-item" style="margin-top: 10px;">
-    <input type="checkbox" id="use-http"> 
+  <div style="margin-bottom: 8px;">
+    <input type="checkbox" id="use-http">
     <label for="use-http">Use HTTP instead of HTTPS</label>
   </div>
-  <span class="option-description">Only use HTTP for local networks or trusted sites</span>
+  
+  <div style="margin-bottom: 8px;">
+    <input type="checkbox" id="redirect-once">
+    <label for="redirect-once">Only redirect once per session</label>
+  </div>
+  
+  <div>
+    <input type="checkbox" id="same-tab">
+    <label for="same-tab">Maintain single homepage tab</label>
+  </div>
 </div>
 
-<button id="save">Save</button>
-<span id="status"></span>
+<div style="display: flex; align-items: center;">
+  <button id="save">Save</button>
+  <div id="status"></div>
+</div>
+
+<div class="note">
+  <p>AlwaysGoHome will redirect new tabs to your specified homepage.</p>
+  <p>When "Maintain single homepage tab" is enabled, it will reuse your existing homepage tab instead of creating new ones.</p>
+</div>
+
+<script src="utils.js"></script>
+<script src="popup.js"></script>
 </body>
 </html> 

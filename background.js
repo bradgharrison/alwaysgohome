@@ -1,31 +1,24 @@
 /**
  * AlwaysGoHome Extension - Background Script
- * Version: 2.1.0
- * Last updated: 2024-03-12
+ * Version: 3.0.0
+ * Last updated: 2024-03-19
  */
+
+// Import the shared utilities
+importScripts('utils.js');
 
 // We'll use this to track our active homepage tab
 let homepageTabId = null;
-
-// Function to log only critical errors
-function logError(message) {
-  console.error("[AlwaysGoHome Background]", message);
-}
-
-// Function to log debug info
-function logDebug(message) {
-  console.log("[AlwaysGoHome Background]", message);
-}
 
 // Helper function to save homepage tab ID to storage
 function saveHomepageTabId() {
   if (homepageTabId !== null) {
     chrome.storage.local.set({ homepageTabId: homepageTabId }, function() {
-      logDebug("Saved homepage tab ID: " + homepageTabId);
+      logDebug('Background', "Saved homepage tab ID: " + homepageTabId);
     });
   } else {
     chrome.storage.local.remove(['homepageTabId'], function() {
-      logDebug("Cleared saved homepage tab ID");
+      logDebug('Background', "Cleared saved homepage tab ID");
     });
   }
 }
@@ -36,49 +29,26 @@ function loadHomepageTabId() {
     if (data.homepageTabId) {
       // Verify the tab still exists and is our homepage
       chrome.tabs.get(data.homepageTabId, function(tab) {
-        if (!chrome.runtime.lastError && tab && tab.url && tab.url.includes('alwaysGoHomeSameTab')) {
+        if (!chrome.runtime.lastError && tab && tab.url && hasHomepageMarker(tab.url)) {
           homepageTabId = data.homepageTabId;
-          logDebug("Restored homepage tab ID: " + homepageTabId);
+          logDebug('Background', "Restored homepage tab ID: " + homepageTabId);
           // Verify the tab is still valid
           verifyHomepageTab(function(isOnHomepage) {
             if (!isOnHomepage) {
               homepageTabId = null;
               saveHomepageTabId();
-              logDebug("Restored tab is no longer valid");
+              logDebug('Background', "Restored tab is no longer valid");
             }
           });
         } else {
           // Tab doesn't exist or isn't our homepage anymore
           homepageTabId = null;
           saveHomepageTabId();
-          logDebug("Saved tab is no longer valid");
+          logDebug('Background', "Saved tab is no longer valid");
         }
       });
     }
   });
-}
-
-// Helper function to format a URL with our special marker
-function formatHomepageUrl(url) {
-  if (!url) return null;
-  
-  // Make sure it has a protocol
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    if (/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(url)) {
-      url = 'http://' + url;
-    } else {
-      url = 'https://' + url;
-    }
-  }
-  
-  // Add our special marker
-  if (url.indexOf('#') === -1) {
-    url += '#alwaysGoHomeSameTab';
-  } else {
-    url += '&alwaysGoHomeSameTab';
-  }
-  
-  return url;
 }
 
 // Check if we should hijack a tab and make it our homepage
@@ -88,7 +58,7 @@ function maybeHijackTab(tabId) {
     chrome.storage.local.get(['homepage', 'hasRedirected', 'redirectOnce'], function(data) {
       // Only redirect if we should (based on redirect once setting)
       if (data.homepage && (!data.redirectOnce || !data.hasRedirected)) {
-        logDebug("Hijacking tab " + tabId + " to become our homepage");
+        logDebug('Background', "Hijacking tab " + tabId + " to become our homepage");
         
         // Make this our homepage tab
         homepageTabId = tabId;
@@ -99,12 +69,12 @@ function maybeHijackTab(tabId) {
         // Redirect the tab
         chrome.tabs.update(tabId, { url: url }, function() {
           if (chrome.runtime.lastError) {
-            logError("Failed to hijack tab: " + chrome.runtime.lastError.message);
+            logError('Background', "Failed to hijack tab: " + chrome.runtime.lastError.message);
             homepageTabId = null;
           } else {
             // Mark that we've redirected in this session
             chrome.storage.local.set({ hasRedirected: true });
-            logDebug("Successfully hijacked tab " + tabId);
+            logDebug('Background', "Successfully hijacked tab " + tabId);
           }
         });
       }
@@ -115,7 +85,7 @@ function maybeHijackTab(tabId) {
 // Check if a homepage tab is still on the correct URL
 function verifyHomepageTab(callback) {
   if (homepageTabId === null) {
-    logDebug("No homepage tab to verify");
+    logDebug('Background', "No homepage tab to verify");
     callback(false);
     return;
   }
@@ -124,7 +94,7 @@ function verifyHomepageTab(callback) {
   chrome.tabs.get(homepageTabId, function(tab) {
     if (chrome.runtime.lastError) {
       // Tab doesn't exist anymore
-      logDebug("Homepage tab doesn't exist anymore: " + chrome.runtime.lastError.message);
+      logDebug('Background', "Homepage tab doesn't exist anymore: " + chrome.runtime.lastError.message);
       homepageTabId = null;
       saveHomepageTabId();
       callback(false);
@@ -133,10 +103,10 @@ function verifyHomepageTab(callback) {
 
     // Additional check for tab state
     if (tab.discarded || tab.status === 'unloaded') {
-      logDebug("Homepage tab is discarded or unloaded, will reload it");
+      logDebug('Background', "Homepage tab is discarded or unloaded, will reload it");
       chrome.tabs.reload(homepageTabId, function() {
         if (chrome.runtime.lastError) {
-          logDebug("Failed to reload discarded tab: " + chrome.runtime.lastError.message);
+          logDebug('Background', "Failed to reload discarded tab: " + chrome.runtime.lastError.message);
           homepageTabId = null;
           saveHomepageTabId();
           callback(false);
@@ -156,7 +126,7 @@ function verifyHomepageTab(callback) {
       
       // Format the homepage URL for comparison (adding protocol if needed)
       if (homepageUrl && !homepageUrl.startsWith('http://') && !homepageUrl.startsWith('https://')) {
-        if (/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(homepageUrl)) {
+        if (isLocalAddress(homepageUrl)) {
           homepageUrl = 'http://' + homepageUrl;
         } else {
           homepageUrl = 'https://' + homepageUrl;
@@ -187,23 +157,25 @@ function verifyHomepageTab(callback) {
             const alternateUrlObj = new URL(alternateUrl);
             isOnHomepage = alternateUrlObj.origin.replace(alternateProtocol, '') === homepageUrlObj.origin.replace(homepageUrlObj.protocol, '');
           } catch (e) {
-            logDebug("Error checking alternate protocol: " + e);
+            logDebug('Background', "Error checking alternate protocol: " + e);
           }
         }
       } catch (e) {
         // Fallback to simple string comparison if URL parsing fails
-        logError("Error parsing URLs: " + e);
+        logError('Background', "Error parsing URLs: " + e);
         isOnHomepage = tabUrl.startsWith(homepageUrl);
       }
       
-      logDebug("Homepage verification: Current=" + tabUrl + ", Should be=" + homepageUrl + ", Match=" + isOnHomepage);
+      logDebug('Background', "Homepage verification: Current=" + tabUrl + ", Should be=" + homepageUrl + ", Match=" + isOnHomepage);
       
       if (!isOnHomepage) {
+        // Tab is no longer on our homepage
+        // We could reset it, but it's better to just let the user navigate freely
         homepageTabId = null;
         saveHomepageTabId();
       }
       
-      callback(isOnHomepage, tab, data.homepage);
+      callback(isOnHomepage);
     });
   });
 }
@@ -216,9 +188,9 @@ function resetTabToHomepage(tabId, homepageUrl) {
   // Update the tab
   chrome.tabs.update(tabId, { url: url }, function() {
     if (chrome.runtime.lastError) {
-      logError("Failed to reset tab to homepage: " + chrome.runtime.lastError.message);
+      logError('Background', "Failed to reset tab to homepage: " + chrome.runtime.lastError.message);
     } else {
-      logDebug("Reset tab " + tabId + " back to homepage");
+      logDebug('Background', "Reset tab " + tabId + " back to homepage");
     }
   });
 }
@@ -228,12 +200,38 @@ function ensureTabFocus(tabId) {
   // First focus the tab
   chrome.tabs.update(tabId, { active: true }, function() {
     if (chrome.runtime.lastError) {
-      logError("Failed to focus tab: " + chrome.runtime.lastError.message);
+      logError('Background', "Failed to focus tab: " + chrome.runtime.lastError.message);
       return;
     }
 
     // Only send one focus message - if the user is already typing, the content script will ignore it
-    chrome.tabs.sendMessage(tabId, { action: 'ensurePageFocus' });
+    // Add proper error handling to the sendMessage call
+    try {
+      chrome.tabs.sendMessage(tabId, { action: 'ensurePageFocus' }, function(response) {
+        // Handle potential errors from the message sending
+        if (chrome.runtime.lastError) {
+          // This is expected sometimes and not a critical error
+          logDebug('Background', "Could not send focus message: " + chrome.runtime.lastError.message);
+          
+          // The tab might be in a state where the content script isn't loaded yet
+          // Let's check if the tab is still valid and reload it if needed
+          chrome.tabs.get(tabId, function(tab) {
+            if (!chrome.runtime.lastError && tab) {
+              if (tab.status === 'complete' && hasHomepageMarker(tab.url)) {
+                // Tab is loaded but content script might not be ready
+                // This is normal in some cases, so we don't need to do anything
+              } else if (tab.status === 'unloaded' || tab.discarded) {
+                // Tab was discarded by Chrome, reload it
+                chrome.tabs.reload(tabId);
+                logDebug('Background', "Reloading discarded tab");
+              }
+            }
+          });
+        }
+      });
+    } catch (e) {
+      logError('Background', "Error sending focus message: " + e);
+    }
   });
 }
 
@@ -262,75 +260,128 @@ function saveState() {
   });
 }
 
-// Enhanced state recovery
+// Enhanced state recovery with better tab tracking
 function recoverState() {
-  logDebug("Attempting to recover homepage state");
-  chrome.storage.local.get(['homepageState', 'homepage'], function(data) {
-    if (data.homepageState && data.homepage) {
-      const state = data.homepageState;
-      
-      // First try to recover the exact tab
-      if (state.tabId !== null) {
-        chrome.tabs.get(state.tabId, function(tab) {
-          if (!chrome.runtime.lastError && tab) {
-            if (tab.url && tab.url.includes('alwaysGoHomeSameTab')) {
-              homepageTabId = tab.id;
-              saveHomepageTabId();
-              logDebug("Recovered exact homepage tab: " + tab.id);
-              return;
-            }
-          }
-          
-          // If exact tab recovery failed, scan all tabs
-          chrome.tabs.query({}, function(tabs) {
-            let foundTab = false;
-            for (let tab of tabs) {
-              if (tab.url && tab.url.includes('alwaysGoHomeSameTab')) {
-                // Found a tab with our marker
+  logDebug('Background', "Attempting to recover homepage state");
+  
+  // Always start with a scan for existing homepage tabs before trying to restore from storage
+  chrome.tabs.query({}, function(allTabs) {
+    // First look for any tab with our marker that's already open
+    let existingHomepageTab = allTabs.find(tab => tab.url && hasHomepageMarker(tab.url));
+    
+    if (existingHomepageTab) {
+      // Found an existing homepage tab, use it
+      homepageTabId = existingHomepageTab.id;
+      saveHomepageTabId();
+      logDebug('Background', "Found existing homepage tab during recovery: " + existingHomepageTab.id);
+      return;
+    }
+    
+    // If no existing tab found, try to recover from stored state
+    chrome.storage.local.get(['homepageState', 'homepage', 'sameTab'], function(data) {
+      // Only proceed if we have stored homepage data and sameTab is enabled
+      if (data.homepage && data.sameTab !== false) {
+        const state = data.homepageState || { tabId: null };
+        
+        // Try to recover the exact tab by ID if we have it
+        if (state.tabId !== null) {
+          chrome.tabs.get(state.tabId, function(tab) {
+            if (!chrome.runtime.lastError && tab) {
+              // The tab exists, but check if it's still our homepage
+              if (tab.url && hasHomepageMarker(tab.url)) {
                 homepageTabId = tab.id;
                 saveHomepageTabId();
-                logDebug("Found alternative homepage tab: " + tab.id);
-                foundTab = true;
-                break;
-              } else if (tab.url && state.lastUrl && tab.url === state.lastUrl) {
-                // Found a tab with matching URL but no marker
-                homepageTabId = tab.id;
-                saveHomepageTabId();
-                logDebug("Found tab with matching URL: " + tab.id);
-                foundTab = true;
-                break;
+                logDebug('Background', "Recovered exact homepage tab: " + tab.id);
+                ensureTabFocus(tab.id);
+                return;
+              }
+              
+              // If the tab exists but isn't on our homepage, check if we should reset it
+              if (data.sameTab) {
+                // If same tab feature is enabled, redirect this tab back to the homepage
+                let url = formatHomepageUrl(data.homepage);
+                chrome.tabs.update(tab.id, { url: url }, function() {
+                  if (!chrome.runtime.lastError) {
+                    homepageTabId = tab.id;
+                    saveHomepageTabId();
+                    logDebug('Background', "Redirected existing tab back to homepage: " + tab.id);
+                  } else {
+                    // If we can't update this tab, we'll need to create a new one
+                    createNewHomepageTab(data.homepage);
+                  }
+                });
+                return;
               }
             }
             
-            if (!foundTab) {
-              logDebug("No valid homepage tab found, will create new one");
-              homepageTabId = null;
-              saveHomepageTabId();
-              // Create a new tab with the homepage
-              chrome.tabs.create({ 
-                url: formatHomepageUrl(data.homepage),
-                active: true 
-              }, function(tab) {
-                if (!chrome.runtime.lastError) {
-                  homepageTabId = tab.id;
-                  saveHomepageTabId();
-                  logDebug("Created new homepage tab: " + tab.id);
-                }
-              });
+            // If we couldn't recover the exact tab, check if any tab matches our last URL
+            if (state.lastUrl) {
+              const matchingTab = allTabs.find(t => t.url === state.lastUrl);
+              if (matchingTab) {
+                // Found a tab with matching URL but no marker, convert it
+                let url = formatHomepageUrl(data.homepage);
+                chrome.tabs.update(matchingTab.id, { url: url }, function() {
+                  if (!chrome.runtime.lastError) {
+                    homepageTabId = matchingTab.id;
+                    saveHomepageTabId();
+                    logDebug('Background', "Converted matching URL tab to homepage: " + matchingTab.id);
+                  } else {
+                    // If we can't update this tab, create a new one
+                    createNewHomepageTab(data.homepage);
+                  }
+                });
+                return;
+              }
+            }
+            
+            // If no suitable tab was found, create a new one only if sameTab is enabled
+            if (data.sameTab) {
+              createNewHomepageTab(data.homepage);
             }
           });
-        });
-      } else {
-        scanForHomepageTab();
+        } else {
+          // No stored tab ID, check if we should create a new tab
+          if (data.sameTab) {
+            createNewHomepageTab(data.homepage);
+          }
+        }
       }
+    });
+  });
+}
+
+// Helper function to create a new homepage tab
+function createNewHomepageTab(homepageUrl) {
+  // Double-check that we don't already have a homepage tab
+  chrome.tabs.query({}, function(tabs) {
+    let existingTab = tabs.find(t => t.url && hasHomepageMarker(t.url));
+    if (existingTab) {
+      // Don't create a duplicate if one already exists
+      homepageTabId = existingTab.id;
+      saveHomepageTabId();
+      logDebug('Background', "Found existing homepage tab, not creating duplicate: " + existingTab.id);
+      ensureTabFocus(existingTab.id);
+      return;
     }
+    
+    // Create a new tab with the homepage
+    chrome.tabs.create({ 
+      url: formatHomepageUrl(homepageUrl),
+      active: true 
+    }, function(tab) {
+      if (!chrome.runtime.lastError) {
+        homepageTabId = tab.id;
+        saveHomepageTabId();
+        logDebug('Background', "Created new homepage tab: " + tab.id);
+      }
+    });
   });
 }
 
 // Enhanced window focus handler
 chrome.windows.onFocusChanged.addListener(function(windowId) {
   if (windowId !== chrome.windows.WINDOW_ID_NONE) {
-    logDebug("Chrome window focused, recovering state");
+    logDebug('Background', "Chrome window focused, recovering state");
     recoverState();
   }
 });
@@ -347,7 +398,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Enhanced startup handling with multiple recovery attempts
 chrome.runtime.onStartup.addListener(function() {
-  logDebug("Browser started, initializing recovery sequence");
+  logDebug('Background', "Browser started, initializing recovery sequence");
   
   // Reset the redirect flag
   chrome.storage.local.set({ hasRedirected: false });
@@ -358,7 +409,7 @@ chrome.runtime.onStartup.addListener(function() {
   
   function attemptRecovery() {
     recoveryAttempts++;
-    logDebug("Recovery attempt " + recoveryAttempts);
+    logDebug('Background', "Recovery attempt " + recoveryAttempts);
     
     chrome.tabs.query({}, function(tabs) {
       // First look for our homepage tab
@@ -367,7 +418,7 @@ chrome.runtime.onStartup.addListener(function() {
       if (foundTab) {
         homepageTabId = foundTab.id;
         saveHomepageTabId();
-        logDebug("Found homepage tab during recovery: " + foundTab.id);
+        logDebug('Background', "Found homepage tab during recovery: " + foundTab.id);
         saveState();
       } else if (recoveryAttempts < maxRecoveryAttempts) {
         // If we haven't found it yet and haven't hit max attempts, try again
@@ -383,11 +434,30 @@ chrome.runtime.onStartup.addListener(function() {
   setTimeout(attemptRecovery, 1000);
 });
 
-// Also recover on install/update
-chrome.runtime.onInstalled.addListener(function() {
-  logDebug("Extension installed/updated, recovering state");
-  chrome.storage.local.set({ hasRedirected: false });
-  recoverState();
+// Handle when the extension is first installed or updated to a new version
+chrome.runtime.onInstalled.addListener(function(details) {
+  logDebug('Background', "Extension installed or updated: " + details.reason);
+  
+  if (details.reason === 'install') {
+    // Set default settings on install
+    chrome.storage.local.set({
+      redirectOnce: false,
+      sameTab: true,
+      hasRedirected: false
+    }, function() {
+      logDebug('Background', "Default settings initialized");
+    });
+  } else if (details.reason === 'update') {
+    // Reset session flag when updating
+    chrome.storage.local.set({
+      hasRedirected: false
+    }, function() {
+      logDebug('Background', "Reset hasRedirected flag after update");
+    });
+  }
+  
+  // Always try to load any saved homepage tab on install/update
+  loadHomepageTabId();
 });
 
 // Listen for tab removal to update our tracking
@@ -395,7 +465,7 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   if (tabId === homepageTabId) {
     homepageTabId = null;
     saveHomepageTabId();
-    logDebug("Homepage tab was closed, tracking reset");
+    logDebug('Background', "Homepage tab was closed, tracking reset");
   }
 });
 
@@ -403,7 +473,7 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 chrome.tabs.onCreated.addListener((newTab) => {
   // If this is a newtab page
   if (newTab.pendingUrl === "chrome://newtab/") {
-    logDebug("New tab created, checking homepage status");
+    logDebug('Background', "New tab created, checking homepage status");
     
     // First check if we already have a homepage tab
     if (homepageTabId !== null) {
@@ -416,7 +486,7 @@ chrome.tabs.onCreated.addListener((newTab) => {
               ensureTabFocus(homepageTabId);
               chrome.tabs.remove(newTab.id, function() {
                 if (chrome.runtime.lastError) {
-                  logError("Failed to close new tab: " + chrome.runtime.lastError.message);
+                  logError('Background', "Failed to close new tab: " + chrome.runtime.lastError.message);
                 }
               });
             } else {
@@ -430,7 +500,7 @@ chrome.tabs.onCreated.addListener((newTab) => {
                   ensureTabFocus(foundTab.id);
                   chrome.tabs.remove(newTab.id, function() {
                     if (chrome.runtime.lastError) {
-                      logError("Failed to close new tab: " + chrome.runtime.lastError.message);
+                      logError('Background', "Failed to close new tab: " + chrome.runtime.lastError.message);
                     }
                   });
                 } else {
@@ -452,7 +522,7 @@ chrome.tabs.onCreated.addListener((newTab) => {
               ensureTabFocus(foundTab.id);
               chrome.tabs.remove(newTab.id, function() {
                 if (chrome.runtime.lastError) {
-                  logError("Failed to close new tab: " + chrome.runtime.lastError.message);
+                  logError('Background', "Failed to close new tab: " + chrome.runtime.lastError.message);
                 }
               });
             } else {
@@ -474,7 +544,7 @@ chrome.tabs.onCreated.addListener((newTab) => {
           ensureTabFocus(foundTab.id);
           chrome.tabs.remove(newTab.id, function() {
             if (chrome.runtime.lastError) {
-              logError("Failed to close new tab: " + chrome.runtime.lastError.message);
+              logError('Background', "Failed to close new tab: " + chrome.runtime.lastError.message);
             }
           });
         } else {
@@ -500,7 +570,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         verifyHomepageTab(function(isOnHomepage, tab, homepageUrl) {
           if (!isOnHomepage) {
             // If the tab has navigated away, we'll reset it back to homepage
-            logDebug("Homepage tab has navigated away, will reset it when focused");
+            logDebug('Background', "Homepage tab has navigated away, will reset it when focused");
             
             sendResponse({
               shouldRedirect: false,
@@ -511,7 +581,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
             });
           } else {
             // Still on homepage, just focus it
-            logDebug("Homepage tab is still on correct URL, will focus it");
+            logDebug('Background', "Homepage tab is still on correct URL, will focus it");
             
             sendResponse({
               shouldRedirect: false,
@@ -527,7 +597,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         // the first tab and if so, mark it as the future homepage tab
         if (homepageTabId === null && !data.hasRedirected && data.homepage) {
           // We'll mark this as our future homepage tab
-          logDebug("First tab scenario - will mark as homepage when redirected");
+          logDebug('Background', "First tab scenario - will mark as homepage when redirected");
           homepageTabId = sender.tab.id;
         }
         
@@ -546,7 +616,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // If sender is a tab, store its ID
     if (sender.tab) {
       homepageTabId = sender.tab.id;
-      logDebug("Marked tab " + homepageTabId + " as homepage tab");
+      logDebug('Background', "Marked tab " + homepageTabId + " as homepage tab");
       sendResponse({ success: true, tabId: homepageTabId });
     } else {
       sendResponse({ success: false, error: 'Not called from a tab' });
@@ -562,15 +632,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         if (chrome.runtime.lastError) {
           // Tab doesn't exist anymore
           homepageTabId = null;
-          logDebug("Homepage tab doesn't exist anymore");
+          logDebug('Background', "Homepage tab doesn't exist anymore");
           sendResponse({ exists: false });
         } else {
-          logDebug("Homepage tab exists: " + homepageTabId);
+          logDebug('Background', "Homepage tab exists: " + homepageTabId);
           sendResponse({ exists: true, tabId: homepageTabId });
         }
       });
     } else {
-      logDebug("No homepage tab tracked");
+      logDebug('Background', "No homepage tab tracked");
       sendResponse({ exists: false });
     }
     return true;
@@ -580,7 +650,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.action === 'markRedirected') {
     // Mark that we've redirected in this browser session
     chrome.storage.local.set({ hasRedirected: true });
-    logDebug("Marked as redirected in this session");
+    logDebug('Background', "Marked as redirected in this session");
   }
 });
 
@@ -593,7 +663,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       if (!tab.url || !tab.url.includes('alwaysGoHomeSameTab')) {
         homepageTabId = null;
         saveHomepageTabId();
-        logDebug("Homepage tab navigated away, tracking reset");
+        logDebug('Background', "Homepage tab navigated away, tracking reset");
       } else if (tab.active) {
         // If this is our homepage and it's active, ensure it maintains focus
         ensureTabFocus(tabId);
@@ -605,7 +675,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       if (homepageTabId === null) {
         homepageTabId = tabId;
         saveHomepageTabId();
-        logDebug("New homepage tab detected and tracked: " + tabId);
+        logDebug('Background', "New homepage tab detected and tracked: " + tabId);
         if (tab.active) {
           ensureTabFocus(tabId);
         }
@@ -622,7 +692,7 @@ function scanForHomepageTab() {
       if (tab.url && tab.url.includes('alwaysGoHomeSameTab')) {
         homepageTabId = tab.id;
         saveHomepageTabId();
-        logDebug("Found existing homepage tab: " + tab.id);
+        logDebug('Background', "Found existing homepage tab: " + tab.id);
         foundHomepageTab = true;
         
         // Verify the found tab is actually valid
@@ -630,7 +700,7 @@ function scanForHomepageTab() {
           if (!isOnHomepage) {
             homepageTabId = null;
             saveHomepageTabId();
-            logDebug("Found tab was not valid homepage");
+            logDebug('Background', "Found tab was not valid homepage");
           }
         });
         break;
@@ -640,14 +710,14 @@ function scanForHomepageTab() {
     if (!foundHomepageTab) {
       homepageTabId = null;
       saveHomepageTabId();
-      logDebug("No homepage tab found in any window");
+      logDebug('Background', "No homepage tab found in any window");
     }
   });
 }
 
 // Also add a check when any window is created
 chrome.windows.onCreated.addListener(function() {
-  logDebug("New window created, verifying homepage tab");
+  logDebug('Background', "New window created, verifying homepage tab");
   if (homepageTabId !== null) {
     verifyHomepageTab(function(isOnHomepage) {
       if (!isOnHomepage) {

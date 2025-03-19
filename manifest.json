@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AlwaysGoHome",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Redirects new tabs to your homepage - supports both HTTP and HTTPS",
   "author": "Brad",
   "permissions": ["storage", "tabs"],
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["utils.js", "content.js"],
       "run_at": "document_end"
     }
   ],
@@ -34,5 +34,11 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["utils.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 } 

@@ -1,41 +1,31 @@
 /**
- * Version: 2.1.0
+ * Version: 3.0.0
  * Content script for AlwaysGoHome extension
- * Last updated: 2025-03-12
+ * Last updated: 2024-03-19
  */
-
-// Function to log only critical errors
-function logError(message) {
-  console.error("[AlwaysGoHome Content]", message);
-}
-
-// Function to log debug info
-function logDebug(message) {
-  console.log("[AlwaysGoHome Content]", message);
-}
 
 // Flag to prevent multiple handlers from processing the same click
 let processingClick = false;
 
 // Check if this is our homepage tab by looking for the special hash
 function isHomepageTab() {
-  return window.location.href.includes('alwaysGoHomeSameTab');
+  return hasHomepageMarker(window.location.href);
 }
 
 // Mark this tab as the homepage tab
 function registerAsHomepage() {
   chrome.runtime.sendMessage({ action: 'markAsHomepageTab' }, function(response) {
     if (chrome.runtime.lastError) {
-      logError("Error marking tab: " + chrome.runtime.lastError.message);
+      logError('Content', "Error marking tab: " + chrome.runtime.lastError.message);
     } else if (response && response.success) {
-      logDebug("Successfully registered as homepage tab");
+      logDebug('Content', "Successfully registered as homepage tab");
     }
   });
 }
 
 // Set up event handlers for link clicks
 function setupLinkHandlers() {
-  logDebug("Setting up link handlers on homepage");
+  logDebug('Content', "Setting up link handlers on homepage");
   
   // The most reliable way to intercept clicks
   document.addEventListener('click', function(e) {
@@ -49,7 +39,7 @@ function setupLinkHandlers() {
     const opensInNewTab = link.target === '_blank' || link.getAttribute('rel') === 'noopener';
     if (!opensInNewTab) return;
     
-    logDebug("Intercepting link click: " + link.href);
+    logDebug('Content', "Intercepting link click: " + link.href);
     
     // Set flag to prevent double-processing
     processingClick = true;
@@ -66,17 +56,17 @@ function setupLinkHandlers() {
       const newWindow = window.open(link.href, windowName, windowFeatures);
       
       if (!newWindow) {
-        logError("Failed to open new window - popup blocked?");
+        logError('Content', "Failed to open new window - popup blocked?");
         // If popup blocked, navigate in same tab as fallback
         window.location.href = link.href;
       } else {
-        logDebug("Successfully opened new window");
+        logDebug('Content', "Successfully opened new window");
         
         // Focus the newly opened window
         newWindow.focus();
       }
     } catch (err) {
-      logError("Error opening window: " + err);
+      logError('Content', "Error opening window: " + err);
       // Fallback
       window.location.href = link.href;
     }
@@ -92,7 +82,7 @@ function setupLinkHandlers() {
 
 // Function to ensure the page has focus
 function ensurePageFocus() {
-  logDebug("Ensuring page has focus");
+  logDebug('Content', "Ensuring page has focus");
   
   try {
     // Don't try to focus if user is already typing somewhere
@@ -100,7 +90,7 @@ function ensurePageFocus() {
         (document.activeElement.tagName === 'INPUT' || 
          document.activeElement.tagName === 'TEXTAREA' ||
          document.activeElement.isContentEditable)) {
-      logDebug("User is already typing, not changing focus");
+      logDebug('Content', "User is already typing, not changing focus");
       return;
     }
 
@@ -118,27 +108,27 @@ function ensurePageFocus() {
     const searchInputs = document.querySelectorAll('input[type="search"], input[name="q"], input[name="query"], input[name="search"]');
     if (searchInputs.length > 0) {
       searchInputs[0].focus({ preventScroll: true });
-      logDebug("Focused search input");
+      logDebug('Content', "Focused search input");
       return;
     }
     
     // If no search input, ensure body has focus
     if (document.body) {
       document.body.focus({ preventScroll: true });
-      logDebug("Focused document body");
+      logDebug('Content', "Focused document body");
     }
   } catch (e) {
-    logError("Error ensuring focus: " + e);
+    logError('Content', "Error ensuring focus: " + e);
   }
 }
 
 // Initialize when the page loads
 function init() {
-  logDebug("Content script running on: " + window.location.href);
+  logDebug('Content', "Content script running on: " + window.location.href);
   
   // If this is our homepage tab
   if (isHomepageTab()) {
-    logDebug("This is our homepage tab");
+    logDebug('Content', "This is our homepage tab");
     
     // Mark this as our homepage tab
     registerAsHomepage();
@@ -179,7 +169,7 @@ document.addEventListener('visibilitychange', function() {
 // Listen for window focus
 window.addEventListener('focus', function() {
   if (isHomepageTab()) {
-    // When the window gets focus, ensure the page has focus
+    // When the window gets focus, ensure the page does too
     ensurePageFocus();
   }
 }); 

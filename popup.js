@@ -1,16 +1,8 @@
 /**
  * AlwaysGoHome Extension - Popup Script
- * Version: 2.1.0
- * Last updated: 2024-03-12
+ * Version: 3.0.0
+ * Last updated: 2024-03-19
  */
-
-// Constants
-const LOCAL_ADDRESS_PATTERN = /^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))/;
-
-// Log critical errors only
-function logError(message) {
-  console.error("[AlwaysGoHome]", message);
-}
 
 // Show status message to the user
 function showStatus(message, type) {
@@ -39,13 +31,13 @@ function processUrl(inputUrl) {
   }
   
   // Check if HTTP protocol is specifically selected
-  var useHttp = document.getElementById('use-http') && document.getElementById('use-http').checked;
+  const useHttp = document.getElementById('use-http') && document.getElementById('use-http').checked;
   
   // If it's a local IP address or localhost, use HTTP by default
-  var isLocalAddress = LOCAL_ADDRESS_PATTERN.test(inputUrl);
+  const isLocalAddr = isLocalAddress(inputUrl);
   
   // Apply the protocol
-  if (useHttp || isLocalAddress) {
+  if (useHttp || isLocalAddr) {
     return 'http://' + inputUrl;
   } else {
     return 'https://' + inputUrl;
@@ -56,12 +48,12 @@ function processUrl(inputUrl) {
 document.addEventListener('DOMContentLoaded', function() {
   // When the save button is clicked, save the settings
   document.getElementById('save').addEventListener('click', function() {
-    var inputUrl = document.getElementById('url').value.trim();
-    var redirectOnce = document.getElementById('redirect-once').checked;
-    var sameTab = document.getElementById('same-tab').checked;
+    const inputUrl = document.getElementById('url').value.trim();
+    const redirectOnce = document.getElementById('redirect-once').checked;
+    const sameTab = document.getElementById('same-tab').checked;
     
     if (inputUrl) {
-      var url = processUrl(inputUrl);
+      const url = processUrl(inputUrl);
       showStatus("Saving...");
       
       // Save directly to Chrome storage
@@ -71,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sameTab: sameTab
       }, function() {
         if (chrome.runtime.lastError) {
-          logError("Error saving: " + chrome.runtime.lastError.message);
+          logError('Popup', "Error saving: " + chrome.runtime.lastError.message);
           showStatus("Error saving!", "error");
           return;
         }
@@ -87,13 +79,13 @@ document.addEventListener('DOMContentLoaded', function() {
   initPopup();
   
   // Setup protocol auto-detection
-  var urlInput = document.getElementById('url');
+  const urlInput = document.getElementById('url');
   urlInput.addEventListener('input', function() {
-    var val = urlInput.value.trim();
-    var httpCheckbox = document.getElementById('use-http');
+    const val = urlInput.value.trim();
+    const httpCheckbox = document.getElementById('use-http');
     
     // Auto-check HTTP for local addresses
-    if (httpCheckbox && LOCAL_ADDRESS_PATTERN.test(val)) {
+    if (httpCheckbox && isLocalAddress(val)) {
       httpCheckbox.checked = true;
     }
     
@@ -111,7 +103,7 @@ function initPopup() {
   // Get all settings from storage
   chrome.storage.local.get(['homepage', 'redirectOnce', 'sameTab'], function(data) {
     if (chrome.runtime.lastError) {
-      logError("Error getting settings: " + chrome.runtime.lastError.message);
+      logError('Popup', "Error getting settings: " + chrome.runtime.lastError.message);
       showStatus("Error loading settings", "error");
       return;
     }
