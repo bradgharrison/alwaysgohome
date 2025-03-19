@@ -1,6 +1,6 @@
 /**
  * AlwaysGoHome Extension - Redirect Script
- * Version: 2.1.0-beta
+ * Version: 2.1.0
  * Last updated: 2024-03-12
  */
 

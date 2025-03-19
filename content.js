@@ -1,5 +1,5 @@
 /**
- * Version: 2.1.0-beta
+ * Version: 2.1.0
  * Content script for AlwaysGoHome extension
  * Last updated: 2025-03-12
  */
