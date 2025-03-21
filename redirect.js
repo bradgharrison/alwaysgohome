@@ -1,7 +1,7 @@
 /**
  * AlwaysGoHome Extension - Redirect Script
- * Version: 2.1
- * Last updated: 2023-05-20
+ * Version: 3.0.1
+ * Last updated: 2024-03-20
  */
 
 // Debug mode flag - set to true to enable verbose logging
